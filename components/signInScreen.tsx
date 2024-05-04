@@ -18,15 +18,26 @@ import {
 import { User } from "firebase/auth";
 import { doc, getFirestore, setDoc } from "firebase/firestore";
 import firebase_app, { auth } from "@/lib/firebase";
+import { useMessage } from "@/lib/messageProvider";
 
 export default function SignInSide() {
+  const message = useMessage();
   const handleSignInWithGoogle = async () => {
     const provider = new GoogleAuthProvider();
     try {
       signInWithPopup(auth, provider)
-        .then(async (result) => {})
+        .then(async (result) => {
+          message.setSuccess("Sign in successful");
+        })
         .catch((error) => {
-          console.log(error.message);
+          console.error(error.code);
+          const errorMessage = error.code
+            .split("/")[1]
+            .replace(/-/g, " ")
+            .replace(/(^\w{1})|(\s+\w{1})/g, (letter: string) =>
+              letter.toUpperCase()
+            );
+          message.setError(`Sign in failed. ${errorMessage}`);
         });
     } catch (error) {
       console.error(error);

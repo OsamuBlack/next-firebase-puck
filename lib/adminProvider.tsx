@@ -1,13 +1,15 @@
 "use client";
 
-import { getAuth, signOut, User } from "firebase/auth";
-import firebase_app from "@/lib/firebase";
-import { doc, getDoc, getFirestore, setDoc } from "firebase/firestore";
-import { useRouter } from "next/navigation";
 import React, { ReactNode, createContext, useEffect, useReducer } from "react";
+
+import firebase_app from "@/lib/firebase";
+import { getAuth, signOut, User } from "firebase/auth";
+import { addDoc, doc, getDoc, getFirestore, setDoc } from "firebase/firestore";
+import { useRouter } from "next/navigation";
+import { useMessage } from "./messageProvider";
+
 import SignInSide from "@/components/signInScreen";
 import LoadingScreen from "@/components/loadingScreen";
-import { useMessage } from "./messageProvider";
 
 export type AdminState = {
   userLoading: boolean;
@@ -64,53 +66,47 @@ export const AdminProvider = ({ children }: { children: ReactNode }) => {
           dispatch({ type: "SET_USER_LOADING", payload: false });
           return;
         }
-        try {
-          const db = getFirestore(firebase_app);
-          getDoc(doc(db, "users", user.uid))
-            .then((res) => {
-              if (res.exists()) {
-                const role = res.data()?.role;
-                if (role == "admin" || role == "editor") {
-                  localStorage.setItem(
-                    "dashboard_user",
-                    JSON.stringify({ user, role })
-                  );
-                  dispatch({
-                    type: "SET_USER",
-                    payload: { user, role },
-                  });
-                  dispatch({ type: "SET_USER_LOADING", payload: false });
-                  message.setSuccess("Logged in successfully");
-                } else {
+        const db = getFirestore(firebase_app);
+        getDoc(doc(db, "users", user.uid))
+          .then((res) => {
+            if (res.exists()) {
+              const role = res.data()?.role;
+              if (role == "admin" || role == "editor") {
+                localStorage.setItem(
+                  "dashboard_user",
+                  JSON.stringify({ user, role })
+                );
+                dispatch({
+                  type: "SET_USER",
+                  payload: { user, role },
+                });
+                dispatch({ type: "SET_USER_LOADING", payload: false });
+                message.setSuccess("Welcome to dashboard");
+              } else {
+                message.setError("You are not authorized to access this page.");
+                signOut(auth);
+                router.push("/");
+              }
+            } else {
+              setDoc(doc(db, "users", user.uid), {
+                email: user.email,
+              })
+                .then((data) => {})
+                .catch((error) => {})
+                .finally(() => {
                   signOut(auth);
                   router.push("/");
                   message.setError(
-                    "You are not authorized to access this page"
+                    "You are not authorized to access this page."
                   );
-                }
-              } else {
-                try {
-                  setDoc(doc(db, "users", user.uid), {
-                    email: user.email,
-                  }).then(() => {
-                    signOut(auth);
-                    router.push("/");
-                    message.setError(
-                      "You are not authorized to access this page"
-                    );
-                  });
-                } catch (error) {
-                  console.error(error);
-                }
-              }
-            })
-            .catch((error) => {
-              console.log("Error getting user: ", error);
-              error.code;
-            });
-        } catch (error) {
-          console.log("Error adding user: ", error);
-        }
+                });
+            }
+          })
+          .catch((error) => {
+            signOut(auth);
+            router.push("/");
+            message.setError("You are not authorized to access this page.");
+          });
       } else {
         dispatch({ type: "SET_USER_LOADING", payload: false });
       }

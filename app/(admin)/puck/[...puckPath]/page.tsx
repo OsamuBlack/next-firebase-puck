@@ -27,18 +27,25 @@ export default async function Page({
     ? "/homepage"
     : `/${puckPath.join("/").replace("/edit", "")}`;
 
-  const docData = await getPageDocument(puckPath);
-  let data: Data;
-  if (docData.exists) {
-    data = docData.data() as Data;
+  const dataDoc = await getPageDocument(puckPath);
+  const recordsDoc = await firestore().collection("records").doc("pages").get();
+  let data: Data,
+    records: { [key: string]: string } = {};
+  if (dataDoc.exists) {
+    data = dataDoc.data() as Data;
   } else {
     data = {
       content: [],
       root: {
-        title: "New Page",
+        props: {
+          title: "New Page",
+        },
       },
       zones: {},
     };
   }
-  return <Client path={path} data={data} />;
+  if (recordsDoc.exists) {
+    records = recordsDoc.data() as { [key: string]: string };
+  }
+  return <Client path={path} data={data} records={records} />;
 }

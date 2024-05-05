@@ -1,18 +1,15 @@
-import { revalidatePath } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { auth, firestore } from "firebase-admin";
 import { DecodedIdToken } from "firebase-admin/auth";
 import admin from "@/lib/firebaseAdmin";
 
 export async function GET(request: NextRequest) {
-  const path = request.nextUrl.searchParams.get("path");
   const secret = request.nextUrl.searchParams.get("secret") || "no-secret";
 
-  if (path) {
-    if (secret == process.env.SECRET) {
-      revalidatePath(path);
-      return Response.json({ revalidated: true, now: Date.now() });
-    }
+  if (secret == process.env.SECRET) {
+    revalidateTag("layout");
+    return Response.json({ revalidated: true, now: Date.now() });
   }
 
   return NextResponse.json({
@@ -21,9 +18,9 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const { path, token } = await request.json();
+  const { token } = await request.json();
 
-  if (path && token) {
+  if (token) {
     admin;
     let session: DecodedIdToken | undefined;
     try {
@@ -38,7 +35,7 @@ export async function POST(request: NextRequest) {
         .get();
       const doc = userDoc.data();
       if (doc && (doc.role == "admin" || doc.role == "editor")) {
-        revalidatePath(path);
+        revalidateTag("layout");
         return Response.json({ revalidated: true, now: Date.now() });
       }
     }

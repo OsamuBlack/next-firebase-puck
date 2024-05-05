@@ -1,12 +1,19 @@
 import type { Config } from "@measured/puck";
 import { Header, HeaderProps } from "./component/header/config";
+import {
+  defaultMetadata,
+  metadataFields,
+  MetadataProps,
+} from "./helperComponents/metadata";
 
 type Props = {
   Header: HeaderProps;
   Content: {};
 };
 
-export const config: Config<Props> = {
+type RootProps = MetadataProps;
+
+export const config: Config<Props, RootProps> = {
   components: {
     Header: Header,
     Content: {
@@ -18,29 +25,8 @@ export const config: Config<Props> = {
     },
   },
   root: {
-    fields: {
-      title: {
-        type: "text",
-        label: "Title",
-      },
-      icon: {
-        type: "object",
-        objectFields: {
-          light: {
-            type: "text",
-            label: "dark",
-          },
-          dark: {
-            type: "text",
-            label: "dark",
-          },
-        },
-        label: "Tab Icons",
-      },
-    },
-    defaultProps: {
-      title: "Root Layout",
-    },
+    fields: metadataFields,
+    defaultProps: defaultMetadata,
   },
 };
 

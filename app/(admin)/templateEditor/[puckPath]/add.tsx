@@ -1,6 +1,7 @@
-"use client"
+"use client";
 
 import Modal from "@/components/modal";
+import firebase_app from "@/lib/firebase";
 import { useMessage } from "@/lib/messageProvider";
 import { Data } from "@measured/puck";
 import { Button, useDisclosure } from "@nextui-org/react";
@@ -11,29 +12,28 @@ import {
   getFirestore,
   setDoc,
 } from "firebase/firestore";
-import { useRouter } from "next/navigation";
 
 export default function CreateNewModal({
   disclosure,
 }: {
   disclosure: ReturnType<typeof useDisclosure>;
 }) {
-  const db = getFirestore();
+  const db = getFirestore(firebase_app);
   const message = useMessage();
-  const router = useRouter();
   return (
     <Modal
-      header={"Create Layout"}
-      disclosure={disclosure}
+      header="Create New Template"
+      disclosure={disclosure as any}
       Actions={
         <Button
           color="primary"
           onPress={async () => {
+            disclosure.onClose();
             message.setInfo("Creating...");
             const data: Data = {
               root: {
                 props: {
-                  title: "New Layout",
+                  title: "New Template",
                 },
               },
               content: [],
@@ -41,17 +41,19 @@ export default function CreateNewModal({
             };
             try {
               disclosure.onClose();
-              const response = await addDoc(collection(db, "layouts"), data);
+              const response = await addDoc(collection(db, "templates"), data);
               if (response.id) {
-                message.setSuccess("Layout Created Successfully");
+                message.setSuccess("Template Created Successfully");
                 await setDoc(
-                  doc(db, "records", "layouts"),
+                  doc(db, "records", "templates"),
                   {
-                    [response.id]: data.root.props?.title || "Untitled",
+                    [response.id]: data.root.props?.title,
                   },
                   { merge: true }
                 );
-                router.push("/" + response.id + "/editLayout");
+                window
+                  .open("/" + response.id + "/editTemplate", "_blank")
+                  ?.focus();
               }
             } catch (error) {
               message.setInfo(
@@ -60,11 +62,11 @@ export default function CreateNewModal({
             }
           }}
         >
-          Create
+          Create Template
         </Button>
       }
     >
-      Procede to create a new layout?
+      Procede to create a new template?
     </Modal>
   );
 }

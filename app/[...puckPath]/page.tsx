@@ -1,19 +1,59 @@
 import getPageDocument from "@/lib/utilities/getPage";
-import { Data } from "@measured/puck";
-import { Metadata } from "next";
+import { Config, Data } from "@measured/puck";
+import { Metadata, ResolvingMetadata } from "next";
 import { notFound } from "next/navigation";
-import Client from "./client";
+import { Render } from "@measured/puck/rsc";
+import config from "@/puck/configPage";
+import admin from "@/lib/firebaseAdmin";
 
-export async function generateMetadata({
-  params: { puckPath = [] },
-}: {
-  params: { puckPath: string[] };
-}): Promise<Metadata> {
+admin;
+export async function generateMetadata(
+  {
+    params: { puckPath = [] },
+  }: {
+    params: { puckPath: string[] };
+  },
+  parent: ResolvingMetadata
+): Promise<Metadata> {
   const doc = await getPageDocument(puckPath);
-
-  return {
-    title: doc.data()?.root.title,
-  };
+  const parentData = await parent;
+  const docData = doc.data();
+  if (doc.exists && docData) {
+    const images = docData.root.props?.ogImages;
+    return {
+      title: docData.root.props?.title + " | " + parentData.title?.absolute,
+      description: docData.root.props?.description,
+      metadataBase: docData.root.props?.canonical,
+      openGraph: {
+        title: docData.root.props?.title,
+        description: docData.root.props?.description,
+        images: images?.length
+          ? images.map((image: any) => ({
+              url: image.url,
+              width: image.width,
+              height: image.height,
+              alt: image.alt,
+            }))
+          : undefined,
+      },
+      twitter: {
+        title: docData.root.props?.title,
+        description: docData.root.props?.description,
+        images: images?.length
+          ? images.map((image: any) => ({
+              url: image.url,
+              width: image.width,
+              height: image.height,
+              alt: image.alt,
+            }))
+          : undefined,
+      },
+    };
+  } else {
+    return {
+      title: "Not Fount | " + parentData.title?.absolute,
+    };
+  }
 }
 
 export default async function Page({
@@ -30,5 +70,5 @@ export default async function Page({
     return notFound();
   }
 
-  return <Client data={data} />;
+  return <Render config={config as Config} data={data} />;
 }

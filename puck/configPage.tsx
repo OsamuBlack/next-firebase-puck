@@ -1,10 +1,13 @@
-"use client";
-
 import type { Config } from "@measured/puck";
 import { Header, HeaderProps } from "./component/header/config";
 import { collection, getDocs, getFirestore } from "firebase/firestore";
 import CardsSection, { CardsSectionProps } from "./component/cardsSection";
 import { ImageSection, ImageSectionProps } from "./component/imageSection";
+import {
+  defaultMetadata,
+  metadataFields,
+  MetadataProps,
+} from "./helperComponents/metadata";
 
 type Props = {
   Header: HeaderProps;
@@ -12,36 +15,15 @@ type Props = {
   Hero: ImageSectionProps;
 };
 
-export const config: Config<Props> = {
+export const config: Config<Props, MetadataProps> = {
   components: {
     Header: Header,
     Cards: CardsSection,
     Hero: ImageSection,
   },
   root: {
-    fields: {
-      title: {
-        type: "text",
-        label: "Title",
-      },
-      layout: {
-        type: "external",
-        label: "Layout",
-        fetchList: async () => {
-          const db = getFirestore();
-          const layouts = await getDocs(collection(db, "layouts"));
-          return layouts.docs.map((doc) => ({
-            value: doc.id,
-            label: doc.data().root.props.title,
-          }));
-        },
-        placeholder: "Select a layout",
-        getItemSummary: (item) => item.label,
-      },
-    },
-    defaultProps: {
-      title: "New",
-    },
+    fields: metadataFields,
+    defaultProps: defaultMetadata,
   },
 };
 

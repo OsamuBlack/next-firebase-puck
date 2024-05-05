@@ -1,9 +1,10 @@
-"use client"
+"use client";
 
 import Modal from "@/components/modal";
 import { useMessage } from "@/lib/messageProvider";
 import { isValidURI } from "@/lib/utilities/validations";
 import { Button, Input, useDisclosure } from "@nextui-org/react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -24,13 +25,13 @@ export default function CreateNewModal({
         <Button
           color="primary"
           onPress={() => {
-            router.push(`${path}/editPage`);
             disclosure.onClose();
-            message.setInfo("Redirecting...");
           }}
           isDisabled={!path || error}
         >
-          Go to page
+          <Link href={path} target="_blank">
+            Go to page
+          </Link>
         </Button>
       }
     >

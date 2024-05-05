@@ -2,11 +2,8 @@
 
 import Modal from "@/components/modal";
 import { useMessage } from "@/lib/messageProvider";
-import { Data } from "@measured/puck";
 import { Button, useDisclosure } from "@nextui-org/react";
 import {
-  addDoc,
-  collection,
   deleteDoc,
   deleteField,
   doc,
@@ -17,47 +14,46 @@ import { useRouter } from "next/navigation";
 
 export default function DeleteModal({
   path,
+  singularName,
+  collection,
   disclosure,
 }: {
   path: string;
+  singularName: string;
+  collection: string;
   disclosure: ReturnType<typeof useDisclosure>;
 }) {
   const db = getFirestore();
   const message = useMessage();
   const router = useRouter();
+  const lowerCaseSingular = singularName.toLowerCase();
+
   return (
     <Modal
-      header={"Delete Page"}
+      header={"Delete " + lowerCaseSingular}
       disclosure={disclosure}
       Actions={
         <Button
           color="primary"
           onPress={async () => {
             message.setInfo("Deleting...");
-            const data: Data = {
-              root: {
-                props: {
-                  title: "New Page",
-                },
-              },
-              content: [],
-              zones: {},
-            };
             try {
               disclosure.onClose();
-              await deleteDoc(doc(db, "pages", path));
-              message.setSuccess("Page Deleted Successfully");
+              await deleteDoc(doc(db, collection, path));
+              message.setSuccess(singularName + " Deleted Successfully");
               await setDoc(
-                doc(db, "records", "pages"),
+                doc(db, "records", collection),
                 {
                   [path]: deleteField(),
                 },
                 { merge: true }
               );
-              router.push("/default/editPage");
+              router.push("/");
             } catch (error) {
               message.setInfo(
-                "Error deleting the layout: " + (error as any).code
+                `Error deleting the ${lowerCaseSingular}: ${
+                  (error as any).code
+                }`
               );
             }
           }}
@@ -66,7 +62,8 @@ export default function DeleteModal({
         </Button>
       }
     >
-      Procede to delete this layout? Once you do it cannot be recovered.
+      Procede to delete this {lowerCaseSingular}? Once you do it cannot be
+      recovered.
     </Modal>
   );
 }

@@ -1,11 +1,11 @@
 import { firestore } from "firebase-admin";
-import admin from "./firebaseAdmin";
+import admin from "../firebaseAdmin";
 
 admin;
 export default async function getPageDocument(puckPath: string[]) {
   const path = !puckPath.length
     ? "/homepage"
-    : `/${puckPath.join("/").replace("/edit", "")}`;
+    : `/${puckPath.join("/").replace("/editPage", "")}`;
 
   const db = firestore();
   const collectionRef = db.collection("pages");

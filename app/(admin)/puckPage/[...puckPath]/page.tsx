@@ -1,17 +1,18 @@
 import { Metadata } from "next";
-import { Client } from "./client";
 import admin from "@/lib/firebaseAdmin";
 import { firestore } from "firebase-admin";
-import { Data } from "@measured/puck";
-import getPageDocument from "@/lib/getPage";
-
+import { Config, Data } from "@measured/puck";
+import getPageDocument from "@/lib/utilities/getPage";
+import { Client } from "@/components/puck/client";
+import config from "@/puck/configPage";
+import Revalidate from "./revalidate";
+import CreateNewModal from "./add";
+import DeleteModal from "./delete";
 export async function generateMetadata({
   params: { puckPath = [] },
 }: {
   params: { puckPath: string[] };
 }): Promise<Metadata> {
-  const path = `/${puckPath.join("/").replace("/edit", "")}`;
-
   return {
     title: "Page Builder",
   };
@@ -25,7 +26,7 @@ export default async function Page({
 }) {
   const path = !puckPath.length
     ? "/homepage"
-    : `/${puckPath.join("/").replace("/edit", "")}`;
+    : `/${puckPath.join("/").replace("/editPage", "")}`;
 
   const dataDoc = await getPageDocument(puckPath);
   const recordsDoc = await firestore().collection("records").doc("pages").get();
@@ -38,7 +39,7 @@ export default async function Page({
       content: [],
       root: {
         props: {
-          title: "New Page",
+          title: "Unsaved Page",
         },
       },
       zones: {},
@@ -47,5 +48,18 @@ export default async function Page({
   if (recordsDoc.exists) {
     records = recordsDoc.data() as { [key: string]: string };
   }
-  return <Client path={path} data={data} records={records} />;
+  return (
+    <Client
+      path={path}
+      data={data}
+      records={records}
+      collection={"pages"}
+      singularName="Page"
+      name="Pages"
+      config={config as Config}
+      revaildate={Revalidate}
+      CreateNewModal={CreateNewModal}
+      DeleteModal={DeleteModal}
+    />
+  );
 }

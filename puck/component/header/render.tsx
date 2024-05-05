@@ -22,7 +22,7 @@ const HeaderRender = ({ logo, menuItems, callToActions }: HeaderProps) => {
   const pathname = usePathname();
 
   return (
-    <Navbar shouldHideOnScroll onMenuOpenChange={setMenuOpen}>
+    <Navbar onMenuOpenChange={setMenuOpen}>
       <NavbarContent>
         <NavbarMenuToggle
           aria-label={isMenuOpen ? "Close menu" : "Open menu"}

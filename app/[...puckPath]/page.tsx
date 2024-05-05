@@ -1,9 +1,8 @@
-import getPageDocument from "@/lib/getPage";
-import config from "@/puck/config";
-import { Config, Data } from "@measured/puck";
-import { Render } from "@measured/puck/rsc";
+import getPageDocument from "@/lib/utilities/getPage";
+import { Data } from "@measured/puck";
 import { Metadata } from "next";
 import { notFound } from "next/navigation";
+import Client from "./client";
 
 export async function generateMetadata({
   params: { puckPath = [] },
@@ -31,5 +30,5 @@ export default async function Page({
     return notFound();
   }
 
-  return <Render config={config as Config} data={data} />;
+  return <Client data={data} />;
 }

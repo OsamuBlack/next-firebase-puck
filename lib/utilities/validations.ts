@@ -6,6 +6,11 @@ export const isValidURL = (string?: string) => {
   return res !== null;
 };
 
+export const isValidURI = (string: string) => {
+  const res = string.match(/^\/[a-zA-Z0-9-]+$/);
+  return res !== null;
+};
+
 export const isValidImageDomain = (string: string) => {
   const domains = [
     "firebasestorage.googleapis.com",

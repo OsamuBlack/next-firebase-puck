@@ -8,7 +8,6 @@ export async function middleware(req: NextRequest) {
     const pathname = req.nextUrl.pathname;
     if (pathname.endsWith("/editPage")) {
       const params = req.nextUrl.searchParams.toString();
-      console.log(params);
       const pathWithoutEdit = pathname.slice(
         0,
         pathname.length - "/editPage".length

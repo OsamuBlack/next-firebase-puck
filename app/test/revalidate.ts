@@ -6,7 +6,6 @@ import { DecodedIdToken } from "firebase-admin/auth";
 import { revalidatePath } from "next/cache";
 
 export default async function Revlaidate(path: string, token: string) {
-  console.log("Revalidating", path, token);
   if (token) {
     admin;
     let session: DecodedIdToken | undefined;

@@ -9,13 +9,14 @@ import admin from "@/lib/firebaseAdmin";
 admin;
 export async function generateMetadata(
   {
-    params: { puckPath = [] },
+    params: { pathSegments = [] },
   }: {
-    params: { puckPath: string[] };
+    params: { pathSegments: string[] };
   },
   parent: ResolvingMetadata
 ): Promise<Metadata> {
-  const doc = await getPageDocument(puckPath);
+  const path = pathSegments.length ? pathSegments.join("/") : "/homepage";
+  const doc = await getPageDocument(path);
   const parentData = await parent;
   const docData = doc.data();
   if (doc.exists && docData) {
@@ -57,12 +58,12 @@ export async function generateMetadata(
 }
 
 export default async function Page({
-  params: { puckPath = [] },
+  params: { pathSegments = [] },
 }: {
-  params: { puckPath: string[] };
+  params: { pathSegments: string[] };
 }) {
-  const doc = await getPageDocument(puckPath);
-
+  const path = pathSegments.length ? pathSegments.join("/") : "/homepage";
+  const doc = await getPageDocument(path);
   let data: Data;
   if (doc.exists) {
     data = doc.data() as Data;

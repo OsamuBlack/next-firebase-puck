@@ -6,6 +6,12 @@ import CreateNewModal from "./add";
 import DeleteModal from "@/components/puck/delete";
 import { Config } from "@measured/puck";
 import Dropdown from "@/components/puck/dropdown";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
+
+export function pageIdToURL(path: string) {
+  return path == "/homepage" ? "" : path;
+}
 
 export default function Client({
   path,
@@ -18,15 +24,22 @@ export default function Client({
   records: { [key: string]: string };
   templates: { [key: string]: string };
 }) {
+  const template = useSearchParams().get("template");
+  const router = useRouter();
   const templatesArray = Object.entries(templates).map(
     ([templatePath, title]) => ({
       key: path,
-      path: `${
-        path == "/homepage" ? "" : path
-      }/editPage?template=${templatePath}`,
+      path: `${pageIdToURL(path)}/editPage?template=${templatePath}`,
       label: title,
     })
   );
+
+  useEffect(() => {
+    if (template) {
+      router.refresh();
+    }
+  }, [template]);
+
   return (
     <Editor
       path={path}
@@ -42,7 +55,7 @@ export default function Client({
       )}
       records={Object.entries(records).map(([path, title]) => ({
         key: path,
-        path: `${path == "/homepage" ? "" : path}/editPage`,
+        path: `${pageIdToURL(path)}/editPage`,
         label: title,
       }))}
       collection={"pages"}

@@ -29,7 +29,7 @@ export default function CreateNewModal({
           }}
           isDisabled={!path || error}
         >
-          <Link href={path} target="_blank">
+          <Link href={path + "/editPage"} target="_blank">
             Go to page
           </Link>
         </Button>

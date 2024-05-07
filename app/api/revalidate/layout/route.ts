@@ -1,4 +1,4 @@
-import { revalidatePath, revalidateTag } from "next/cache";
+import { revalidateTag } from "next/cache";
 import { NextRequest, NextResponse } from "next/server";
 import { auth, firestore } from "firebase-admin";
 import { DecodedIdToken } from "firebase-admin/auth";
@@ -6,9 +6,9 @@ import admin from "@/lib/firebaseAdmin";
 
 export async function GET(request: NextRequest) {
   const secret = request.nextUrl.searchParams.get("secret") || "no-secret";
-
-  if (secret == process.env.SECRET) {
-    revalidateTag("layout");
+  console.log("Secret", secret, process.env.API_SECRET)
+  if (secret == process.env.API_SECRET) {
+    revalidateTag("root-layout");
     return Response.json({ revalidated: true, now: Date.now() });
   }
 

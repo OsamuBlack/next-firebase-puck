@@ -5,11 +5,7 @@ import { Data } from "@measured/puck";
 import getTemplateDocument from "@/lib/utilities/getTemplate";
 import Client from "./client";
 
-export async function generateMetadata({
-  params: { puckPath = [] },
-}: {
-  params: { puckPath: string[] };
-}): Promise<Metadata> {
+export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Template Builder",
   };
@@ -17,13 +13,13 @@ export async function generateMetadata({
 
 admin;
 export default async function Template({
-  params: { puckPath = "" },
+  params: { pathSegments = "" },
 }: {
-  params: { puckPath: string };
+  params: { pathSegments: string };
 }) {
-  const path = !puckPath.length ? "default" : puckPath;
+  const path = pathSegments == "" ? "/default" : pathSegments;
+  const dataDoc = await getTemplateDocument(path);
 
-  const dataDoc = await getTemplateDocument(puckPath);
   const recordsDoc = await firestore()
     .collection("records")
     .doc("templates")

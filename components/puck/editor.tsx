@@ -8,7 +8,6 @@ import firebase_app, { auth } from "@/lib/firebase";
 import { useMessage } from "@/lib/messageProvider";
 import MessageScreen from "@/components/messageScreen";
 import { Button, Tooltip, useDisclosure } from "@nextui-org/react";
-import { usePathname, useRouter } from "next/navigation";
 import { FaPlus, FaTrash } from "react-icons/fa";
 import { useEffect, useState } from "react";
 import Dropdown from "./dropdown";
@@ -58,7 +57,6 @@ export function Editor({
   Action?: (unsaved: boolean) => React.ReactNode;
 }) {
   const message = useMessage();
-  const router = useRouter();
   const addDisclosure = useDisclosure();
   const deleteDisclosure = useDisclosure();
   const [unsaved, setUnsaved] = useState(false);

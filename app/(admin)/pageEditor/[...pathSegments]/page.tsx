@@ -6,11 +6,7 @@ import getPageDocument from "@/lib/utilities/getPage";
 import Client from "./client";
 import getTemplateDocument from "@/lib/utilities/getTemplate";
 
-export async function generateMetadata({
-  params: { puckPath = [] },
-}: {
-  params: { puckPath: string[] };
-}): Promise<Metadata> {
+export async function generateMetadata(): Promise<Metadata> {
   return {
     title: "Page Builder",
   };
@@ -18,18 +14,18 @@ export async function generateMetadata({
 
 admin;
 export default async function Page({
-  params: { puckPath = [] },
+  params: { pathSegments = [] },
   searchParams,
 }: {
-  params: { puckPath: string[] };
+  params: { pathSegments: string[] };
   searchParams: { template: string | undefined };
 }) {
-  const path = !puckPath.length ? "/homepage" : `/${puckPath.join("/")}`;
+  
+  const path = pathSegments.length ? pathSegments.join("/") : "/homepage";
   const queries = [
     firestore().collection("records").doc("pages").get(),
     firestore().collection("records").doc("templates").get(),
   ];
-  console.log(searchParams)
   if (searchParams.template) {
     queries.push(getTemplateDocument(searchParams.template));
   } else {

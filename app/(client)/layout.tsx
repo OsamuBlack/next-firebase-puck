@@ -3,20 +3,34 @@ import getLayoutDocument from "@/lib/utilities/getLayout";
 import config from "@/puck/configLayout";
 import { Config, Data } from "@measured/puck";
 import { Render } from "@measured/puck/rsc";
-import { getAppCheck } from "firebase-admin/app-check";
+import { firestore } from "firebase-admin";
 import { Metadata } from "next";
 import { unstable_cache } from "next/cache";
 
 admin;
+
 const getCachedLayout = unstable_cache(
-  () => getLayoutDocument("default"),
-  ["layout"]
+  async () => {
+    const db = firestore();
+    const collectionRef = db.collection("layouts");
+    const docData = await collectionRef.doc("default").get();
+    return docData.exists
+      ? { exists: true, data: docData.data() }
+      : { exists: false };
+  },
+  ["root-layout"],
+  {
+    revalidate: false,
+    tags: ["root-layout"],
+  }
 );
 
 export async function generateMetadata(): Promise<Metadata> {
+  const data = await getCachedLayout();
+
   const layoutDoc = await getCachedLayout();
   if (layoutDoc.exists) {
-    const layoutData = layoutDoc.data() as Data;
+    const layoutData = layoutDoc.data as Data;
     return {
       title: layoutData.root.props?.title || "Site",
       description: layoutData.root.props?.description,
@@ -63,9 +77,11 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Layout({ children }: { children: string }) {
+  const data = await getCachedLayout();
+
   const layoutDoc = await getCachedLayout();
   if (layoutDoc.exists) {
-    const layoutData = layoutDoc.data() as Data;
+    const layoutData = layoutDoc.data as Data;
     const contentPlacement = layoutData.content.findIndex(
       (block) => block.type == "Content"
     );
